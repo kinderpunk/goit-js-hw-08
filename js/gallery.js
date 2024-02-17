@@ -68,29 +68,18 @@ const images = [
 
 const portfolio = document.querySelector('.gallery');
 
-function createImages({ preview, original, description }) {
-  const elements = `
+function createModalContent(image) {
+  return `
     <li class="gallery-item">
-      <a class="gallery-link" href="${original}">
-        <img
+      <img
         class="gallery-image"
-        src="${preview}"
-        data-source="${original}"
-        alt="${description}"
-        />
-      </a>
+        src="${image.original}"
+        alt="${image.description}"
+      />
     </li>`;
-
-  return elements;
 }
 
-let currentModal = '';
-
-for (let image of images) {
-  currentModal += createImages(image);
-}
-
-portfolio.innerHTML = currentModal;
+let currentModal = null;
 
 portfolio.addEventListener('click', event => {
   event.preventDefault();
@@ -104,23 +93,19 @@ portfolio.addEventListener('click', event => {
 
   let currentImage = images.find(item => item.original == imageSource);
 
-  currentModal = `
-      <li class="gallery-item">
-        <img
-          class="gallery-image"
-          src="${currentImage.original}"
-          alt="${currentImage.description}"
-        />
-      </li>`;
+  const modalContent = createModalContent(currentImage);
 
-  currentModal = basicLightbox.create(currentModal, {
+  if (currentModal) {
+    currentModal.close();
+  }
+
+  currentModal = basicLightbox.create(modalContent, {
     onShow: instance => {
-      instance
-        .element()
-        .querySelector('.gallery-image')
-        .addEventListener('click', () => {
+      instance.element().addEventListener('click', event => {
+        if (event.target.tagName === 'IMG') {
           instance.close();
-        });
+        }
+      });
     },
   });
 
